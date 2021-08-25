@@ -176,6 +176,6 @@ export default {
     hideModal() {
       this.modal.hide();
     },
-  }
-}
+  },
+};
 </script>

@@ -59,7 +59,7 @@
       :product="tempProduct"
       :isNew="isNew"
       ref="productModal"
-      @upload-product="udateProduct"
+      @update-product="updateProduct"
     >
 
     </ProductModal>
@@ -86,8 +86,19 @@ export default {
       isLoading: false,
       pagination: {},
       products: [],
+      tempProduct: {},
+      isNew: false,
+      status: {
+        fileUploading: false,
+      },
+      modal: {
+        editModal: '',
+        delModal: '',
+      },
+      currentPage: 1,
     };
   },
+  inject: ['emitter', '$httpMessageState'],
   created() {
     this.getProducts();
   },
@@ -114,7 +125,7 @@ export default {
         httpMethod = 'put';
         status = 'update';
       }
-      const productComponent = this.$refs.ProductModal;
+      const productComponent = this.$refs.productModal;
       this.$http[httpMethod](url, { data: this.tempProduct })
         .then((res) => {
           if (res.data.success) {

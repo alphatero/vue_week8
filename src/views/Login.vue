@@ -24,10 +24,10 @@
 export default {
   data() {
     return {
-      user: Object,
+      user: {},
     };
   },
-  inject: ['$httpMessageState', 'emitter'],
+  inject: ['emitter', '$httpMessageState'],
   methods: {
     signIn() {
       const url = `${process.env.VUE_APP_API}/admin/signin`;
