@@ -59,7 +59,102 @@
 </template>
 
 <script>
-export default {
+import CouponModal from '@/components/CouponModal.vue';
+import DelModal from '@/components/DelModal.vue';
 
+export default {
+  components: { CouponModal, DelModal },
+  props: {
+    config: Object,
+  },
+  inject: ['emitter', '$httpMessageState'],
+  data() {
+    return {
+      tempCoupon: {
+        title: '',
+        percent: 100,
+        code: '',
+        is_enabled: 0,
+      },
+      isNew: false,
+      isLoading: false,
+      coupons: {},
+    };
+  },
+  methods: {
+    getCoupon() {
+      const url = `${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/coupons`;
+      this.isLoading = true;
+      this.$http.get(url, this.tempProduct).then((res) => {
+        this.coupons = res.data.coupons;
+        this.isLoading = false;
+      });
+    },
+    openCouponModal(isNew, item) {
+      this.isNew = isNew;
+      if (this.isNew) {
+        this.tempCoupon = {
+          due_date: new Date().getTime() / 1000,
+        };
+      } else {
+        this.tempCoupon = { ...item };
+      }
+      this.$refs.couponModal.openModal();
+    },
+    updateCoupon(tempCoupon) {
+      this.isLoading = true;
+      if (this.isNew) {
+        const url = `${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/coupon`;
+        this.$http.post(url, { data: tempCoupon }).then((res) => {
+          if (res.data.success) {
+            this.$httpMessageState(res, 'add coupon');
+            this.isLoading = false;
+            this.getCoupon();
+            this.$refs.couponModal.hideModal();
+          } else {
+            this.$httpMessageState(res, 'update coupon');
+            this.isLoading = false;
+          }
+        });
+      } else {
+        const url = `${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/coupon/${this.tempCoupon.id}`;
+        this.$http.put(url, { data: this.tempCoupon }).then((res) => {
+          if (res.data.success) {
+            this.$httpMessageState(res, 'update coupon');
+            this.isLoading = false;
+            this.getCoupon();
+            this.$refs.couponModal.hideModal();
+          } else {
+            this.$httpMessageState(res, 'update coupon');
+            this.isLoading = false;
+          }
+        });
+      }
+    },
+    openDelCouponModal(item) {
+      this.tempCoupon = { ...item };
+      const delComponent = this.$refs.delModal;
+      delComponent.openModal();
+    },
+    delCoupon() {
+      const url = `${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/coupon/${this.tempCoupon.id}`;
+      this.isLoading = true;
+      this.$http.delete(url).then((res) => {
+        if (res.data.success) {
+          this.$httpMessageState(res, 'delete coupon');
+          this.isLoading = false;
+          const delComponent = this.$refs.delModal;
+          delComponent.hideModal();
+          this.getCoupon();
+        } else {
+          this.$httpMessageState(res, 'delete coupon');
+          this.isLoading = false;
+        }
+      });
+    },
+  },
+  created() {
+    this.getCoupon();
+  },
 };
 </script>
